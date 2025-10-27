@@ -326,10 +326,10 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
           <main className="flex flex-1 flex-col overflow-hidden">
             {/* Tabs */}
             <div className="border-b border-slate-800 bg-slate-950/30 backdrop-blur-xl">
-              <div className="flex flex-wrap gap-1 px-3 sm:px-4 pt-2">
+              <div className="flex flex-wrap gap-1 px-3 sm:px-4 pt-2 pb-2">
                 <button
                   onClick={() => setActiveTab("browse")}
-                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                  className={`rounded-t-lg px-3 sm:px-4 py-2 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === "browse"
                       ? "bg-slate-900/50 text-white"
                       : "text-slate-400 hover:text-white"
@@ -340,7 +340,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                 </button>
                 <button
                   onClick={() => setActiveTab("query")}
-                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                  className={`rounded-t-lg px-3 sm:px-4 py-2 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === "query"
                       ? "bg-slate-900/50 text-white"
                       : "text-slate-400 hover:text-white"
@@ -352,7 +352,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                 {userRole === "admin" && (
                   <button
                     onClick={() => setActiveTab("users")}
-                    className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                    className={`rounded-t-lg px-3 sm:px-4 py-2 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
                       activeTab === "users"
                         ? "bg-slate-900/50 text-white"
                         : "text-slate-400 hover:text-white"
@@ -364,22 +364,22 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                 )}
                 <button
                   onClick={() => setActiveTab("logs")}
-                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                  className={`rounded-t-lg px-3 sm:px-4 py-2 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === "logs"
                       ? "bg-slate-900/50 text-white"
                       : "text-slate-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Activity className="h-4 w-4 inline mr-1.5" />
                   <span>Logs</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("performance")}
-                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                  className={`rounded-t-lg px-3 sm:px-4 py-2 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === "performance"
                       ? "bg-slate-900/50 text-white"
                       : "text-slate-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Gauge className="h-4 w-4 inline mr-1.5" />
                   <span>Performance</span>
