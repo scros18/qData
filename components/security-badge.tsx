@@ -68,13 +68,13 @@ export function SecurityBadge() {
       {/* Security Details Dropdown */}
       {showDetails && (
         <>
-          {/* Backdrop overlay for mobile */}
+          {/* Backdrop overlay - covers entire screen */}
           <div 
-            className="fixed inset-0 bg-black/20 z-[90] md:hidden" 
+            className="fixed inset-0 bg-black/30 z-[9998]" 
             onClick={() => setShowDetails(false)}
           />
           
-          <Card className="fixed md:absolute left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 top-16 md:top-12 w-[calc(100vw-2rem)] max-w-sm md:w-80 p-4 bg-slate-900/98 md:bg-slate-900/95 border-slate-700 backdrop-blur-xl shadow-2xl z-[100]">
+          <Card className="fixed md:absolute left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 top-16 md:top-12 w-[calc(100vw-2rem)] max-w-sm md:w-80 p-4 bg-slate-900/98 md:bg-slate-900/95 border-slate-700 backdrop-blur-xl shadow-2xl z-[9999]">
             <div className="space-y-4">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-700 pb-3">

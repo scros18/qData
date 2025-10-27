@@ -69,14 +69,19 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Force HTTPS in production
+  // Force HTTPS in production (but not on localhost)
   if (process.env.NODE_ENV === 'production') {
-    const proto = request.headers.get('x-forwarded-proto');
-    if (proto && proto !== 'https') {
-      return NextResponse.redirect(
-        `https://${request.headers.get('host')}${request.nextUrl.pathname}${request.nextUrl.search}`,
-        301 // Permanent redirect
-      );
+    const host = request.headers.get('host');
+    const isLocalhost = host?.includes('localhost') || host?.includes('127.0.0.1');
+    
+    if (!isLocalhost) {
+      const proto = request.headers.get('x-forwarded-proto');
+      if (proto && proto !== 'https') {
+        return NextResponse.redirect(
+          `https://${host}${request.nextUrl.pathname}${request.nextUrl.search}`,
+          301 // Permanent redirect
+        );
+      }
     }
   }
 
@@ -108,12 +113,17 @@ export function middleware(request: NextRequest) {
     ].join('; ')
   );
 
-  // HSTS - Force HTTPS for 1 year
+  // HSTS - Force HTTPS for 1 year (but not on localhost)
   if (process.env.NODE_ENV === 'production') {
-    headers.set(
-      'Strict-Transport-Security',
-      'max-age=31536000; includeSubDomains; preload'
-    );
+    const host = request.headers.get('host');
+    const isLocalhost = host?.includes('localhost') || host?.includes('127.0.0.1');
+    
+    if (!isLocalhost) {
+      headers.set(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains; preload'
+      );
+    }
   }
 
   // Referrer Policy - Don't leak URLs
