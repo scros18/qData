@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser, createSession } from '@/lib/auth';
+import { generateSessionFingerprint } from '@/lib/security';
 import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,13 @@ export async function POST(request: NextRequest) {
                       request.headers.get('x-real-ip') || 
                       'unknown';
 
+    // Generate session fingerprint (anti-hijacking)
+    const fingerprint = generateSessionFingerprint({
+      userAgent: request.headers.get('user-agent') || undefined,
+      acceptLanguage: request.headers.get('accept-language') || undefined,
+      acceptEncoding: request.headers.get('accept-encoding') || undefined,
+    });
+
     const user = authenticateUser(username, password, ipAddress);
 
     if (!user) {
@@ -29,8 +37,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create session (PIN not verified yet)
-    const session = createSession(user, false, ipAddress);
+    // Create session (PIN not verified yet) with fingerprint
+    const session = createSession(user, false, ipAddress, fingerprint);
 
     // Set session cookie
     const cookieStore = await cookies();

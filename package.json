@@ -1,7 +1,7 @@
 {
   "name": "qdata",
-  "version": "0.1.0",
-  "description": "Modern MySQL Admin Panel - The PHPMyAdmin killer",
+  "version": "2.1.0",
+  "description": "Enterprise-Grade MySQL/MariaDB Management - The secure, beautiful alternative to phpMyAdmin",
   "private": true,
   "scripts": {
     "dev": "next dev",

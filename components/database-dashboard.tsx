@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import * as React from "react";
-import { Database, Table2, Zap, Moon, Sun, Search, Plus, Loader2, LogOut, Users as UsersIcon, Settings, Activity } from "lucide-react";
+import { Database, Table2, Zap, Moon, Sun, Search, Plus, Loader2, LogOut, Users as UsersIcon, Settings, Activity, Gauge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { TableBrowser } from "./table-browser";
 import { TableDataViewer } from "./table-data-viewer";
 import { UserManagement } from "./user-management";
 import { AuditLogs } from "./audit-logs";
+import { SystemPerformance } from "./system-performance";
 import { useToast } from "@/hooks/use-toast";
 import { SecurityBadge } from "./security-badge";
 
@@ -27,7 +28,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"query" | "browse" | "users" | "logs">("browse");
+  const [activeTab, setActiveTab] = useState<"query" | "browse" | "users" | "logs" | "performance">("browse");
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -325,7 +326,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
           <main className="flex flex-1 flex-col overflow-hidden">
             {/* Tabs */}
             <div className="border-b border-slate-800 bg-slate-950/30 backdrop-blur-xl">
-              <div className="flex gap-1 px-3 sm:px-4 pt-2">
+              <div className="flex flex-wrap gap-1 px-3 sm:px-4 pt-2">
                 <button
                   onClick={() => setActiveTab("browse")}
                   className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
@@ -335,7 +336,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                   }`}
                 >
                   <Table2 className="h-4 w-4 inline mr-1.5" />
-                  Browse
+                  <span>Browse</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("query")}
@@ -346,7 +347,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                   }`}
                 >
                   <Zap className="h-4 w-4 inline mr-1.5" />
-                  Query
+                  <span>Query</span>
                 </button>
                 {userRole === "admin" && (
                   <button
@@ -358,7 +359,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                     }`}
                   >
                     <UsersIcon className="h-4 w-4 inline mr-1.5" />
-                    Users
+                    <span>Users</span>
                   </button>
                 )}
                 <button
@@ -370,18 +371,32 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                   }`}
                 >
                   <Activity className="h-4 w-4 inline mr-1.5" />
-                  <span className="hidden sm:inline">Logs</span>
+                  <span>Logs</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("performance")}
+                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                    activeTab === "performance"
+                      ? "bg-slate-900/50 text-white"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Gauge className="h-4 w-4 inline mr-1.5" />
+                  <span>Performance</span>
                 </button>
               </div>
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
-              {activeTab === "users" ? (
-                <UserManagement />
-              ) : activeTab === "logs" ? (
-                <AuditLogs />
-              ) : activeTab === "browse" ? (
+            <div className="flex-1 overflow-hidden">
+              <div className={activeTab === "performance" ? "h-full overflow-hidden" : "h-full overflow-auto p-3 sm:p-4 md:p-6"}>
+                {activeTab === "users" ? (
+                  <UserManagement />
+                ) : activeTab === "logs" ? (
+                  <AuditLogs />
+                ) : activeTab === "performance" ? (
+                  <SystemPerformance />
+                ) : activeTab === "browse" ? (
                 selectedTable && selectedDatabase ? (
                   <TableDataViewer
                     database={selectedDatabase}
@@ -397,6 +412,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
               ) : (
                 <QueryEditor />
               )}
+              </div>
             </div>
           </main>
         </div>

@@ -1,7 +1,7 @@
 import { createHash, randomBytes, pbkdf2Sync } from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import { validatePasswordStrength, validatePin, validateUsername, checkRateLimit, resetRateLimit, logSecurityEvent } from './security';
+import { validatePasswordStrength, validatePin, validateUsername, checkRateLimit, resetRateLimit, logSecurityEvent, generateSessionFingerprint, verifySessionFingerprint, SessionFingerprint } from './security';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
@@ -35,6 +35,7 @@ export interface Session {
   pinVerified: boolean;
   lastActivity: string;
   ipAddress?: string;
+  fingerprint?: SessionFingerprint;
 }
 
 // Hash password with salt
@@ -294,7 +295,12 @@ export function verifyUserPin(userId: string, pin: string): boolean {
 }
 
 // Create session
-export function createSession(user: User, pinVerified: boolean = false, ipAddress?: string): Session {
+export function createSession(
+  user: User, 
+  pinVerified: boolean = false, 
+  ipAddress?: string,
+  fingerprint?: SessionFingerprint
+): Session {
   const sessions = loadSessions();
   const now = new Date();
 
@@ -308,6 +314,7 @@ export function createSession(user: User, pinVerified: boolean = false, ipAddres
     pinVerified,
     lastActivity: now.toISOString(),
     ipAddress,
+    fingerprint,
   };
 
   sessions.push(session);
@@ -316,8 +323,11 @@ export function createSession(user: User, pinVerified: boolean = false, ipAddres
   return session;
 }
 
-// Get session
-export function getSession(sessionId: string): Session | null {
+// Get session with fingerprint verification
+export function getSession(
+  sessionId: string, 
+  currentFingerprint?: SessionFingerprint
+): Session | null {
   const sessions = loadSessions();
   const session = sessions.find(s => s.sessionId === sessionId);
 
@@ -331,6 +341,32 @@ export function getSession(sessionId: string): Session | null {
   if (new Date(session.expiresAt) < now) {
     deleteSession(sessionId);
     return null;
+  }
+
+  // Verify session fingerprint if available (anti-session hijacking)
+  if (session.fingerprint && currentFingerprint) {
+    const fingerprintCheck = verifySessionFingerprint(
+      session.fingerprint,
+      {
+        userAgent: currentFingerprint.userAgent,
+        acceptLanguage: currentFingerprint.acceptLanguage,
+        acceptEncoding: currentFingerprint.acceptEncoding
+      }
+    );
+
+    if (!fingerprintCheck.isValid) {
+      // Possible session hijacking detected!
+      logSecurityEvent({
+        type: 'session_hijack_attempt',
+        username: session.username,
+        ip: session.ipAddress,
+        details: fingerprintCheck.reason || 'Session fingerprint mismatch'
+      });
+      
+      // Invalidate the session for security
+      deleteSession(sessionId);
+      return null;
+    }
   }
 
   // Check for inactivity timeout (15 minutes)

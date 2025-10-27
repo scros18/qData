@@ -6,12 +6,13 @@
 
 **The secure, beautiful alternative to phpMyAdmin**
 
-[![Security: Enterprise](https://img.shields.io/badge/Security-Enterprise-success?style=for-the-badge)](docs/security)
+[![Version](https://img.shields.io/badge/Version-2.1.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![Security: 18 Features](https://img.shields.io/badge/Security-18_Features-success?style=for-the-badge)](docs/security)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-[**Documentation**](docs/) • [**Security**](docs/security/) • [**Deployment**](docs/deployment/)
+[**Documentation**](docs/) • [**Security**](docs/security/) • [**Deployment**](docs/deployment/) • [**Changelog**](CHANGELOG.md)
 
 </div>
 
@@ -22,7 +23,7 @@
 | Feature | QData | phpMyAdmin |
 |---------|-------|------------|
 | **🎨 Modern UI** | Beautiful, dark mode, mobile-responsive | Outdated 2005 design |
-| **🔒 Security** | 17/17 security features | 8/17 features |
+| **🔒 Security** | 18/18 security features | 8/18 features |
 | **🔐 Authentication** | Dual auth (Password + PIN) | Password only |
 | **⚡ Query History** | Last 100 queries, searchable | None |
 | **📤 Export** | CSV & JSON, one-click | Buried in menus |
@@ -38,14 +39,15 @@
 
 ## ✨ Key Features
 
-### 🔒 **Military-Grade Security**
+### 🔒 **Military-Grade Security** (18 Features - 2.25x phpMyAdmin)
 - **Dual Authentication:** Password (PBKDF2 100K iterations) + PIN
+- **Session Fingerprinting:** Detects and prevents session hijacking attempts
 - **Rate Limiting:** 5 attempts → 15-minute lockout
 - **Auto-Logout:** 15-minute inactivity timeout
 - **SQL Injection Prevention:** Multi-layer protection
 - **XSS Protection:** React auto-escaping + CSP headers
 - **Audit Logging:** Every action tracked
-- **Session Security:** IP binding + activity monitoring
+- **Session Security:** IP binding + activity monitoring + fingerprint verification
 
 ### 🎨 **Beautiful Design**
 - Modern dark theme (iOS-inspired)
@@ -55,7 +57,8 @@
 - Touch-friendly controls
 
 ### ⚡ **Developer-Friendly**
-- **Query History:** Never lose your queries
+- **Query History:** Never lose your queries (last 100 saved)
+- **Real-time Performance Monitoring:** Live CPU & memory graphs
 - **Keyboard Shortcuts:** Ctrl+Enter to execute
 - **Smart Autocomplete:** Context-aware suggestions
 - **Export Anywhere:** CSV & JSON with one click
@@ -63,10 +66,11 @@
 
 ### 📊 **Enterprise Features**
 - Role-based access control (Admin/User)
-- Complete audit trail
+- Complete audit trail with security events
+- Real-time system performance monitoring
 - Query performance tracking
 - Connection pooling
-- Session management
+- Session management with fingerprinting
 - User management
 
 ---
@@ -122,7 +126,7 @@ sudo systemctl start mariadb
 
 ## 🔒 Security
 
-QData implements **17 critical security features** that make it **2.1x more secure than phpMyAdmin**.
+QData implements **18 critical security features** that make it **2.25x more secure than phpMyAdmin**.
 
 ### Active Protections
 
@@ -133,6 +137,7 @@ QData implements **17 critical security features** that make it **2.1x more secu
 ✅ **XSS Protection** - Multi-layer escaping  
 ✅ **CSRF Protection** - Token validation  
 ✅ **Session Security** - Cryptographic tokens  
+✅ **Session Fingerprinting** - Detects and prevents hijacking  
 ✅ **Audit Logging** - Complete activity trail  
 ✅ **PIN Validation** - No weak PINs allowed  
 ✅ **Input Sanitization** - All inputs validated  

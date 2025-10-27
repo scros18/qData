@@ -284,7 +284,7 @@ export function isIpWhitelisted(ip: string, whitelist: string[]): boolean {
 
 // Log security event (should write to audit log)
 export function logSecurityEvent(event: {
-  type: 'login_failed' | 'login_success' | 'logout' | 'rate_limit' | 'suspicious_query' | 'unauthorized_access';
+  type: 'login_failed' | 'login_success' | 'logout' | 'rate_limit' | 'suspicious_query' | 'unauthorized_access' | 'session_hijack_attempt';
   username?: string;
   ip?: string;
   details?: string;
@@ -297,4 +297,79 @@ export function logSecurityEvent(event: {
   
   // In production, write to secure log file or service
   console.log('[SECURITY]', JSON.stringify(logEntry));
+}
+
+// ============================================
+// SESSION FINGERPRINTING (Anti-Session Hijacking)
+// ============================================
+
+export interface SessionFingerprint {
+  userAgent: string;
+  acceptLanguage: string;
+  acceptEncoding: string;
+  hash: string;
+}
+
+/**
+ * Generate a session fingerprint from browser headers
+ * This helps detect session hijacking attempts
+ */
+export function generateSessionFingerprint(headers: {
+  userAgent?: string;
+  acceptLanguage?: string;
+  acceptEncoding?: string;
+}): SessionFingerprint {
+  const userAgent = headers.userAgent || 'unknown';
+  const acceptLanguage = headers.acceptLanguage || 'unknown';
+  const acceptEncoding = headers.acceptEncoding || 'unknown';
+  
+  // Create a hash of the fingerprint
+  const crypto = require('crypto');
+  const fingerprintString = `${userAgent}|${acceptLanguage}|${acceptEncoding}`;
+  const hash = crypto.createHash('sha256').update(fingerprintString).digest('hex');
+  
+  return {
+    userAgent,
+    acceptLanguage,
+    acceptEncoding,
+    hash
+  };
+}
+
+/**
+ * Verify if current request matches the session fingerprint
+ * Returns true if fingerprints match (legitimate session)
+ * Returns false if mismatch detected (possible hijacking)
+ */
+export function verifySessionFingerprint(
+  storedFingerprint: SessionFingerprint,
+  currentHeaders: {
+    userAgent?: string;
+    acceptLanguage?: string;
+    acceptEncoding?: string;
+  }
+): { isValid: boolean; reason?: string } {
+  const currentFingerprint = generateSessionFingerprint(currentHeaders);
+  
+  // Compare hashes for exact match
+  if (storedFingerprint.hash === currentFingerprint.hash) {
+    return { isValid: true };
+  }
+  
+  // Detect what changed
+  const changes: string[] = [];
+  if (storedFingerprint.userAgent !== currentFingerprint.userAgent) {
+    changes.push('User-Agent changed');
+  }
+  if (storedFingerprint.acceptLanguage !== currentFingerprint.acceptLanguage) {
+    changes.push('Accept-Language changed');
+  }
+  if (storedFingerprint.acceptEncoding !== currentFingerprint.acceptEncoding) {
+    changes.push('Accept-Encoding changed');
+  }
+  
+  return {
+    isValid: false,
+    reason: `Session fingerprint mismatch: ${changes.join(', ')}`
+  };
 }

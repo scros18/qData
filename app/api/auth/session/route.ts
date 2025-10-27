@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
+import { generateSessionFingerprint } from '@/lib/security';
 import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const session = getSession(sessionId);
+    // Generate current fingerprint for verification
+    const currentFingerprint = generateSessionFingerprint({
+      userAgent: request.headers.get('user-agent') || undefined,
+      acceptLanguage: request.headers.get('accept-language') || undefined,
+      acceptEncoding: request.headers.get('accept-encoding') || undefined,
+    });
+
+    const session = getSession(sessionId, currentFingerprint);
 
     if (!session) {
       return NextResponse.json(
