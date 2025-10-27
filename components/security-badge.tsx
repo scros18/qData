@@ -22,6 +22,28 @@ export function SecurityBadge() {
     fetchSecurityStatus();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!showDetails) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Don't close if clicking on the button itself (handled by button's onClick)
+      if (target.closest('button[title="Security Status"]')) return;
+      setShowDetails(false);
+    };
+
+    // Small delay to prevent immediate closing
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showDetails]);
+
   const fetchSecurityStatus = async () => {
     try {
       const response = await fetch("/qdata/api/auth/session");

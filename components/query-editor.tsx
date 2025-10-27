@@ -222,6 +222,15 @@ export function QueryEditor() {
 
   return (
     <div className="space-y-4">
+      {/* Hidden file input for SQL import */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".sql"
+        className="hidden"
+      />
+      
       {/* Query Input - Terminal Style */}
       <Card className="border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-0 overflow-hidden shadow-2xl">
         {/* Terminal Header */}
@@ -246,6 +255,15 @@ export function QueryEditor() {
             >
               <History className="h-3.5 w-3.5 sm:mr-1.5" />
               <span className="hidden sm:inline">History</span>
+            </Button>
+            <Button
+              onClick={handleImportSQL}
+              variant="ghost"
+              size="sm"
+              className="hidden md:flex h-7 text-xs text-slate-400 hover:text-white hover:bg-slate-800"
+            >
+              <Upload className="h-3.5 w-3.5 sm:mr-1.5" />
+              <span className="hidden sm:inline">Import SQL</span>
             </Button>
             <Button
               onClick={copyQuery}
