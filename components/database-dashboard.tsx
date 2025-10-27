@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import * as React from "react";
-import { Database, Table2, Zap, Moon, Sun, Search, Plus, Loader2, LogOut, Users as UsersIcon, Settings, Activity, Gauge } from "lucide-react";
+import { Database, Table2, Zap, Search, Plus, Loader2, LogOut, Users as UsersIcon, Settings, Activity, Gauge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { useTheme } from "next-themes";
 import { ConnectionDialog } from "./connection-dialog";
 import { QueryEditor } from "./query-editor";
 import { TableBrowser } from "./table-browser";
@@ -29,15 +28,12 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"query" | "browse" | "users" | "logs" | "performance">("browse");
-  const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string>("");
   const [username, setUsername] = useState<string>("");
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
-  // Avoid hydration mismatch
+  // Fetch user info on mount
   useEffect(() => {
-    setMounted(true);
     fetchUserInfo();
     
     // Check if there's a saved connection and auto-connect
@@ -180,21 +176,6 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                 <span className="sm:hidden">✕</span>
               </Button>
             )}
-            
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="text-slate-300 hover:text-white hover:bg-slate-800 h-8 w-8 sm:h-10 sm:w-10"
-              title={mounted && theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {mounted && theme === "dark" ? (
-                <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
-              ) : (
-                <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
-              )}
-            </Button>
 
             {/* Logout Button */}
             <Button
