@@ -129,7 +129,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
     <div className="flex h-screen flex-col">
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-xl">
-        <div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
+        <div className="container flex h-14 sm:h-16 items-center px-3 sm:px-4">
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Simple Q Logo */}
             <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-sky-500 shadow-lg shadow-sky-500/50 hover:shadow-sky-500/70 transition-all">
