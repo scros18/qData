@@ -174,6 +174,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                 size="sm"
                 onClick={handleDisconnect}
                 className="border-slate-700 text-slate-300 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500 text-xs px-2 sm:px-3"
+                title="Disconnect from database"
               >
                 <span className="hidden sm:inline">Disconnect</span>
                 <span className="sm:hidden">✕</span>
@@ -186,6 +187,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="text-slate-300 hover:text-white hover:bg-slate-800 h-8 w-8 sm:h-10 sm:w-10"
+              title={mounted && theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             >
               {mounted && theme === "dark" ? (
                 <Sun className="h-4 w-4 sm:h-5 sm:w-5" />

@@ -73,13 +73,13 @@ export function SecurityBadge() {
         <>
           {/* Backdrop overlay - covers entire screen and closes on click */}
           <div 
-            className="fixed inset-0 z-[9998]" 
+            className="fixed inset-0 z-[9998] bg-black/20 backdrop-blur-sm animate-in fade-in duration-200" 
             onClick={() => setShowDetails(false)}
           />
           
           <Card 
             onClick={(e) => e.stopPropagation()}
-            className="fixed top-16 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-sm p-4 bg-slate-900 border-slate-700 shadow-2xl z-[9999]"
+            className="fixed top-16 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-sm p-4 bg-slate-900 border-slate-700 shadow-2xl z-[9999] animate-in slide-in-from-top-4 fade-in duration-300"
           >
             <div className="space-y-4">
               {/* Header */}
