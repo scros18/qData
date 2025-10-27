@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import * as React from "react";
-import { Database, Table2, Zap, Moon, Sun, Search, Plus, Loader2, LogOut, Users as UsersIcon, Settings } from "lucide-react";
+import { Database, Table2, Zap, Moon, Sun, Search, Plus, Loader2, LogOut, Users as UsersIcon, Settings, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { QueryEditor } from "./query-editor";
 import { TableBrowser } from "./table-browser";
 import { TableDataViewer } from "./table-data-viewer";
 import { UserManagement } from "./user-management";
+import { AuditLogs } from "./audit-logs";
 import { useToast } from "@/hooks/use-toast";
 
 interface DatabaseDashboardProps {
@@ -25,7 +26,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"query" | "browse" | "users">("browse");
+  const [activeTab, setActiveTab] = useState<"query" | "browse" | "users" | "logs">("browse");
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -130,11 +131,22 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
       <header className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-xl">
         <div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-              <Database className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+            {/* Terminal-style logo with macOS window controls and Q */}
+            <div className="relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 overflow-hidden group hover:border-emerald-500/50 transition-all">
+              {/* macOS window dots */}
+              <div className="absolute top-1 left-1 flex gap-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500/60 group-hover:bg-red-500"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/60 group-hover:bg-yellow-500"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500/60 group-hover:bg-green-500"></div>
+              </div>
+              {/* Q with terminal cursor */}
+              <div className="flex items-center">
+                <span className="text-emerald-400 font-bold text-base sm:text-lg font-mono tracking-tight">Q</span>
+                <div className="w-0.5 h-3 sm:h-4 bg-emerald-400 ml-0.5 animate-pulse"></div>
+              </div>
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-white">QData</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">QData</h1>
             </div>
           </div>
 
@@ -348,6 +360,17 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                     Users
                   </button>
                 )}
+                <button
+                  onClick={() => setActiveTab("logs")}
+                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                    activeTab === "logs"
+                      ? "bg-slate-900/50 text-white"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Activity className="h-4 w-4 inline mr-1.5" />
+                  <span className="hidden sm:inline">Logs</span>
+                </button>
               </div>
             </div>
 
@@ -355,6 +378,8 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
             <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
               {activeTab === "users" ? (
                 <UserManagement />
+              ) : activeTab === "logs" ? (
+                <AuditLogs />
               ) : activeTab === "browse" ? (
                 selectedTable && selectedDatabase ? (
                   <TableDataViewer

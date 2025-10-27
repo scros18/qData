@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPool, isConnected } from "@/lib/database";
 import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
+import { addAuditLog } from "@/lib/audit";
+import { getSession } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
+  const startTime = performance.now();
+  let session = null;
+  
   try {
+    // Get session for logging
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('qdata_session')?.value;
+    if (sessionId) {
+      session = getSession(sessionId);
+    }
+
     if (!isConnected()) {
       return NextResponse.json(
         { error: "Not connected to database", needsReconnect: true },
@@ -52,6 +65,19 @@ export async function POST(request: NextRequest) {
 
     console.log('Update result:', result);
 
+    const duration = performance.now() - startTime;
+
+    // Log successful update
+    if (session) {
+      addAuditLog(
+        session.userId,
+        session.username,
+        'Update Row',
+        `Updated ${result.affectedRows} row(s) in ${table}`,
+        { database, table, status: 'success', duration }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       affectedRows: result.affectedRows,
@@ -64,6 +90,20 @@ export async function POST(request: NextRequest) {
       sqlMessage: error.sqlMessage,
       sql: error.sql,
     });
+
+    const duration = performance.now() - startTime;
+
+    // Log failed update
+    if (session) {
+      const { database, table } = await request.json().catch(() => ({}));
+      addAuditLog(
+        session.userId,
+        session.username,
+        'Update Row',
+        `Failed to update row in ${table || 'unknown'}: ${error.message}`,
+        { database, table, status: 'error', duration }
+      );
+    }
     
     // Check if connection was lost
     if (error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ECONNREFUSED') {

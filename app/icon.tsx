@@ -14,21 +14,64 @@ export default function Icon() {
       <div
         style={{
           fontSize: 24,
-          background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: 'white',
-          borderRadius: '8px',
+          borderRadius: '6px',
+          position: 'relative',
         }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="12" cy="5" rx="9" ry="3" stroke="white" strokeWidth="2"/>
-          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="white" strokeWidth="2"/>
-          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="white" strokeWidth="2"/>
-        </svg>
+        {/* Terminal window background with emerald accent */}
+        <div style={{
+          position: 'absolute',
+          top: '3px',
+          left: '3px',
+          right: '3px',
+          bottom: '3px',
+          background: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
+          borderRadius: '4px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          {/* macOS-style window dots */}
+          <div style={{
+            position: 'absolute',
+            top: '3px',
+            left: '4px',
+            display: 'flex',
+            gap: '2px',
+          }}>
+            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#ef4444', opacity: 0.8 }} />
+            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#f59e0b', opacity: 0.8 }} />
+            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#10b981', opacity: 0.8 }} />
+          </div>
+          
+          {/* Q letter with terminal cursor */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            color: '#ecfdf5',
+            letterSpacing: '-0.5px',
+            marginTop: '2px',
+          }}>
+            Q<span style={{ 
+              width: '2px', 
+              height: '14px', 
+              background: '#10b981',
+              marginLeft: '1px',
+              animation: 'blink 1s infinite',
+            }} />
+          </div>
+        </div>
       </div>
     ),
     {
