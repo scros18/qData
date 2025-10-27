@@ -150,42 +150,47 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
-            {/* User Info */}
+          <div className="flex items-center gap-1 sm:gap-3 ml-auto">
+            {/* User Info - Desktop Only */}
             {username && (
-              <div className="hidden sm:flex items-center gap-2 mr-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700">
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700">
                 <span className="text-xs text-slate-400">Logged in as:</span>
                 <span className="text-sm font-medium text-white">{username}</span>
                 {userRole === "admin" && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
                     Admin
                   </span>
                 )}
               </div>
             )}
 
+            {/* Connection Status Badge - Desktop */}
             {connected && (
-              <>
-                <div className="mr-1 sm:mr-2 flex items-center gap-1 sm:gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-xs sm:text-sm text-slate-300 hidden sm:inline">Connected</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDisconnect}
-                  className="border-slate-700 text-slate-300 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500 text-xs px-2 sm:px-3"
-                >
-                  Disconnect
-                </Button>
-              </>
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700">
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span className="text-sm text-slate-300">Connected</span>
+              </div>
+            )}
+
+            {/* Disconnect Button */}
+            {connected && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDisconnect}
+                className="border-slate-700 text-slate-300 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500 text-xs px-2 sm:px-3"
+              >
+                <span className="hidden sm:inline">Disconnect</span>
+                <span className="sm:hidden">✕</span>
+              </Button>
             )}
             
+            {/* Theme Toggle */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="text-slate-300 hover:text-white h-8 w-8 sm:h-10 sm:w-10"
+              className="text-slate-300 hover:text-white hover:bg-slate-800 h-8 w-8 sm:h-10 sm:w-10"
             >
               {mounted && theme === "dark" ? (
                 <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -194,6 +199,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
               )}
             </Button>
 
+            {/* Logout Button */}
             <Button
               variant="ghost"
               size="icon"
@@ -204,6 +210,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
               <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
 
+            {/* Connect Button */}
             {!connected && (
               <ConnectionDialog
                 onConnect={handleConnect}

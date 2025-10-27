@@ -180,6 +180,13 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
     setEditingCell(null);
   };
 
+  const handleAddRow = () => {
+    toast({
+      title: "Add Row",
+      description: "Coming soon! This feature will allow you to insert new rows.",
+    });
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-slate-800 bg-slate-900/50 p-4 sm:p-6">
@@ -249,6 +256,7 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
                   <span className="hidden sm:inline">Refresh</span>
                 </Button>
                 <Button
+                  onClick={handleAddRow}
                   variant="outline"
                   size="sm"
                   className="border-blue-700 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1 sm:flex-initial"
@@ -309,8 +317,8 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
                         return (
                           <td
                             key={column}
-                            className={`px-4 py-3 text-sm font-mono max-w-xs ${
-                              isEditable ? 'cursor-pointer' : ''
+                            className={`px-4 py-3 text-sm font-mono max-w-xs transition-all duration-200 ease-out ${
+                              isEditable ? 'cursor-pointer hover:bg-slate-800/30' : ''
                             }`}
                             onDoubleClick={() =>
                               isEditable &&
@@ -326,7 +334,7 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
                                 onBlur={handleCellBlur}
                                 onKeyDown={handleKeyDown}
                                 autoFocus
-                                className="w-full bg-slate-700 text-white px-2 py-1 rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full bg-slate-700 text-white px-2 py-1 rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-top-1"
                               />
                             ) : cellValue === null ? (
                               <span className="text-slate-500 italic">NULL</span>
