@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Play, Loader2, Copy, Download, Trash2, CheckCircle2, XCircle, Terminal, History, FileJson, FileSpreadsheet, Clock, Search, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Play, Loader2, Copy, Download, Trash2, CheckCircle2, XCircle, Terminal, History, FileJson, FileSpreadsheet, Clock, Search, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
@@ -26,6 +26,7 @@ export function QueryEditor() {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<QueryHistoryEntry[]>([]);
   const [historySearch, setHistorySearch] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -179,6 +180,42 @@ export function QueryEditor() {
       toast({
         title: "✓ Exported",
         description: "Results exported as JSON",
+      });
+    }
+  };
+
+  const handleImportSQL = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.sql')) {
+      toast({
+        title: "❌ Invalid File",
+        description: "Please select a .sql file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      setQuery(text);
+      toast({
+        title: "✓ SQL File Loaded",
+        description: `Loaded ${file.name} (${Math.round(text.length / 1024)}KB)`,
+      });
+      
+      // Reset the input so the same file can be selected again
+      e.target.value = '';
+    } catch (error) {
+      toast({
+        title: "❌ Error",
+        description: "Failed to read SQL file",
+        variant: "destructive",
       });
     }
   };
