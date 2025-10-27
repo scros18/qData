@@ -20,9 +20,11 @@ qdata-credentials.txt
 data/users.json
 data/sessions.json
 data/audit-logs.json
+data/query-history.json
 users.json
 sessions.json
 audit-logs.json
+query-history.json
 *.secret
 *.key
 auth.json

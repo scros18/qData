@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Table, Loader2, RefreshCw, Plus, Save, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Table, Loader2, RefreshCw, Plus, Save, X, ChevronLeft, ChevronRight, FileJson, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
@@ -239,6 +239,47 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
     }
   };
 
+  const exportTableData = (format: 'csv' | 'json') => {
+    if (data.length === 0) return;
+
+    if (format === 'csv') {
+      const csv = [
+        columns.join(","),
+        ...data.map((row) =>
+          columns.map(col => {
+            const val = row[col];
+            return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
+          }).join(",")
+        ),
+      ].join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${database}_${table}_${Date.now()}.csv`;
+      a.click();
+
+      toast({
+        title: "✓ Exported",
+        description: `Exported ${data.length} rows as CSV`,
+      });
+    } else if (format === 'json') {
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${database}_${table}_${Date.now()}.json`;
+      a.click();
+
+      toast({
+        title: "✓ Exported",
+        description: `Exported ${data.length} rows as JSON`,
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-slate-800 bg-slate-900/50 p-4 sm:p-6">
@@ -302,16 +343,36 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
                   onClick={() => fetchTableData()}
                   variant="outline"
                   size="sm"
-                  className="border-slate-700 bg-slate-800 text-white hover:bg-slate-700 flex-1 sm:flex-initial"
+                  className="border-slate-700 bg-slate-800 text-white hover:bg-slate-700"
                 >
                   <RefreshCw className="h-4 w-4 sm:mr-1" />
                   <span className="hidden sm:inline">Refresh</span>
                 </Button>
                 <Button
+                  onClick={() => exportTableData('csv')}
+                  variant="outline"
+                  size="sm"
+                  disabled={data.length === 0}
+                  className="border-slate-700 bg-slate-800 text-white hover:bg-slate-700"
+                >
+                  <FileSpreadsheet className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">CSV</span>
+                </Button>
+                <Button
+                  onClick={() => exportTableData('json')}
+                  variant="outline"
+                  size="sm"
+                  disabled={data.length === 0}
+                  className="border-slate-700 bg-slate-800 text-white hover:bg-slate-700"
+                >
+                  <FileJson className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">JSON</span>
+                </Button>
+                <Button
                   onClick={handleAddRow}
                   variant="outline"
                   size="sm"
-                  className="border-blue-700 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1 sm:flex-initial"
+                  className="border-blue-700 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                 >
                   <Plus className="h-4 w-4 sm:mr-1" />
                   <span className="hidden sm:inline">Add Row</span>
