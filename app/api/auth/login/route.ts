@@ -15,7 +15,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = authenticateUser(username, password);
+    // Get client IP address
+    const ipAddress = request.headers.get('x-forwarded-for') || 
+                      request.headers.get('x-real-ip') || 
+                      'unknown';
+
+    const user = authenticateUser(username, password, ipAddress);
 
     if (!user) {
       return NextResponse.json(
@@ -25,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session (PIN not verified yet)
-    const session = createSession(user, false);
+    const session = createSession(user, false, ipAddress);
 
     // Set session cookie
     const cookieStore = await cookies();
