@@ -15,6 +15,16 @@ build
 qdata-credentials.txt
 *credentials*.txt
 
+# QData Authentication Files - NEVER COMMIT!
+/data/
+data/users.json
+data/sessions.json
+users.json
+sessions.json
+*.secret
+*.key
+auth.json
+
 # Logs
 *.log
 npm-debug.log*
