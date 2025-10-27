@@ -13,6 +13,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate PIN format (exactly 4 digits)
+    if (!/^\d{4}$/.test(pin)) {
+      return NextResponse.json(
+        { error: 'PIN must be exactly 4 digits' },
+        { status: 400 }
+      );
+    }
+
     // Get session from cookie
     const cookieStore = await cookies();
     const sessionId = cookieStore.get('qdata_session')?.value;

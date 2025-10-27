@@ -281,6 +281,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                         onClick={() => {
                           setSelectedDatabase(db);
                           setSelectedTable(null);
+                          setActiveTab("browse"); // Always switch to Browse tab when selecting a database
                         }}
                         className={`w-full rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-left text-xs sm:text-sm transition-colors ${
                           selectedDatabase === db

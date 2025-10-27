@@ -44,10 +44,10 @@ export function InitialSetup({ onSetupComplete }: InitialSetupProps) {
       return;
     }
 
-    if (!/^\d{4,6}$/.test(pin)) {
+    if (!/^\d{4}$/.test(pin)) {
       toast({
         title: "Invalid PIN",
-        description: "PIN must be 4-6 digits",
+        description: "PIN must be exactly 4 digits",
         variant: "destructive",
       });
       return;
@@ -190,13 +190,13 @@ export function InitialSetup({ onSetupComplete }: InitialSetupProps) {
                 type="password"
                 placeholder="1234"
                 value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
                 required
-                pattern="\d{4,6}"
-                maxLength={6}
+                pattern="\d{4}"
+                maxLength={4}
                 className="bg-slate-800 border-slate-700 text-white text-center text-2xl tracking-widest placeholder:text-slate-500 focus:border-emerald-500"
               />
-              <p className="text-xs text-slate-500">4-6 digit PIN required on every login</p>
+              <p className="text-xs text-slate-500">4-digit PIN required on every login</p>
             </div>
 
             {/* Confirm PIN */}
@@ -209,10 +209,10 @@ export function InitialSetup({ onSetupComplete }: InitialSetupProps) {
                 type="password"
                 placeholder="1234"
                 value={confirmPin}
-                onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
                 required
-                pattern="\d{4,6}"
-                maxLength={6}
+                pattern="\d{4}"
+                maxLength={4}
                 className="bg-slate-800 border-slate-700 text-white text-center text-2xl tracking-widest placeholder:text-slate-500 focus:border-emerald-500"
               />
             </div>

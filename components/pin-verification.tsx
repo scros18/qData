@@ -12,7 +12,7 @@ interface PinVerificationProps {
 }
 
 export function PinVerification({ onVerified, onLogout }: PinVerificationProps) {
-  const [pin, setPin] = useState(["", "", "", "", "", ""]);
+  const [pin, setPin] = useState(["", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -32,18 +32,18 @@ export function PinVerification({ onVerified, onLogout }: PinVerificationProps) 
     setError(false);
 
     // Auto-focus next input
-    if (value && index < 5) {
+    if (value && index < 3) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all 6 digits entered
-    if (index === 5 && value) {
+    // Auto-submit when all 4 digits entered
+    if (index === 3 && value) {
       const fullPin = [...newPin];
       fullPin[index] = value;
       if (fullPin.every(d => d !== "")) {
         verifyPin(fullPin.join(""));
       }
-    } else if (index < 5 && newPin.every(d => d !== "")) {
+    } else if (newPin.every(d => d !== "")) {
       verifyPin(newPin.join(""));
     }
   };
@@ -58,7 +58,7 @@ export function PinVerification({ onVerified, onLogout }: PinVerificationProps) 
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
     const newPin = [...pin];
     
     for (let i = 0; i < pastedData.length; i++) {
@@ -67,10 +67,10 @@ export function PinVerification({ onVerified, onLogout }: PinVerificationProps) 
     
     setPin(newPin);
     
-    if (pastedData.length === 6) {
+    if (pastedData.length === 4) {
       verifyPin(pastedData);
     } else {
-      inputRefs.current[Math.min(pastedData.length, 5)]?.focus();
+      inputRefs.current[Math.min(pastedData.length, 3)]?.focus();
     }
   };
 
@@ -125,7 +125,7 @@ export function PinVerification({ onVerified, onLogout }: PinVerificationProps) 
   };
 
   const clearPin = () => {
-    setPin(["", "", "", "", "", ""]);
+    setPin(["", "", "", ""]);
     setError(false);
     inputRefs.current[0]?.focus();
   };
@@ -158,7 +158,7 @@ export function PinVerification({ onVerified, onLogout }: PinVerificationProps) 
               Security PIN Required
             </h1>
             <p className="text-slate-400 text-sm">
-              Enter your {pin.some(d => d) ? pin.filter(d => d).length : "4-6"} digit PIN to continue
+              Enter your 4-digit PIN to continue
             </p>
           </div>
 
