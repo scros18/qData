@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import * as React from "react";
-import { Database, Table2, Zap, Moon, Sun, Search, Plus, Loader2 } from "lucide-react";
+import { Database, Table2, Zap, Moon, Sun, Search, Plus, Loader2, LogOut, Users as UsersIcon, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -11,23 +11,31 @@ import { ConnectionDialog } from "./connection-dialog";
 import { QueryEditor } from "./query-editor";
 import { TableBrowser } from "./table-browser";
 import { TableDataViewer } from "./table-data-viewer";
+import { UserManagement } from "./user-management";
 import { useToast } from "@/hooks/use-toast";
 
-export function DatabaseDashboard() {
+interface DatabaseDashboardProps {
+  onLogout: () => void;
+}
+
+export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
   const [connected, setConnected] = useState(false);
   const [databases, setDatabases] = useState<string[]>([]);
   const [loadingDatabases, setLoadingDatabases] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"query" | "browse">("browse");
+  const [activeTab, setActiveTab] = useState<"query" | "browse" | "users">("browse");
   const [mounted, setMounted] = useState(false);
+  const [userRole, setUserRole] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
+    fetchUserInfo();
     
     // Check if there's a saved connection and auto-connect
     const savedConnection = localStorage.getItem('qdata_connection');
@@ -41,6 +49,19 @@ export function DatabaseDashboard() {
       }
     }
   }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch("/qdata/api/auth/session");
+      const data = await response.json();
+      if (data.authenticated && data.user) {
+        setUsername(data.user.username);
+        setUserRole(data.user.role);
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
 
   // Fetch databases after connection
   useEffect(() => {
