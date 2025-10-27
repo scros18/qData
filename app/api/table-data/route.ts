@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTables, isConnected } from '@/lib/database';
+import { getTableData, getTableCount, isConnected } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,31 +17,28 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const database = searchParams.get('database');
+    const table = searchParams.get('table');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-    if (!database) {
+    if (!database || !table) {
       return NextResponse.json(
-        { success: false, error: 'Database parameter is required' },
+        { success: false, error: 'Database and table parameters are required' },
         { status: 400 }
       );
     }
 
-    const tables = await getTables(database);
-    
-    // Extract table names from the result
-    const tableNames = (tables as any[]).map((row: any) => {
-      // MySQL returns table names in different formats
-      const key = Object.keys(row)[0];
-      return row[key];
-    });
+    const data = await getTableData(database, table, limit, offset);
+    const total = await getTableCount(database, table);
 
     return NextResponse.json({
       success: true,
-      tables: tableNames,
+      data,
+      total,
     });
   } catch (error: any) {
-    console.error('Error fetching tables:', error);
+    console.error('Error fetching table data:', error);
     
-    // Check if it's a connection error
     if (error.message?.includes('connection') || error.message?.includes('connect')) {
       return NextResponse.json(
         {
@@ -56,7 +53,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to fetch tables',
+        error: error.message || 'Failed to fetch table data',
       },
       { status: 500 }
     );

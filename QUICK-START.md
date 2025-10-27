@@ -1,4 +1,4 @@
-# 🚀 Deploy QData to BlissHairStudio VPS - Quick Guide
+s# 🚀 Deploy QData to BlissHairStudio VPS - Quick Guide
 
 ## Option 1: PowerShell Upload (Easiest for Windows)
 

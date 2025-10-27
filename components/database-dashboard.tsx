@@ -10,6 +10,7 @@ import { useTheme } from "next-themes";
 import { ConnectionDialog } from "./connection-dialog";
 import { QueryEditor } from "./query-editor";
 import { TableBrowser } from "./table-browser";
+import { TableDataViewer } from "./table-data-viewer";
 import { useToast } from "@/hooks/use-toast";
 
 export function DatabaseDashboard() {
@@ -57,11 +58,21 @@ export function DatabaseDashboard() {
       if (data.success) {
         setDatabases(data.databases);
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to fetch databases",
-          variant: "destructive",
-        });
+        // Check if reconnection is needed
+        if (data.needsReconnect) {
+          setConnected(false);
+          toast({
+            title: "Connection Lost",
+            description: "Please reconnect to the database",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch databases",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error fetching databases:", error);
@@ -96,29 +107,28 @@ export function DatabaseDashboard() {
     <div className="flex h-screen flex-col">
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-xl">
-        <div className="container flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-              <Database className="h-6 w-6 text-white" />
+        <div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+              <Database className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">QData</h1>
-              <p className="text-xs text-slate-400">Modern MySQL Admin</p>
+              <h1 className="text-lg sm:text-xl font-bold text-white">QData</h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {connected && (
               <>
-                <div className="mr-2 flex items-center gap-2">
+                <div className="mr-1 sm:mr-2 flex items-center gap-1 sm:gap-2">
                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-sm text-slate-300">Connected</span>
+                  <span className="text-xs sm:text-sm text-slate-300 hidden sm:inline">Connected</span>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleDisconnect}
-                  className="border-slate-700 text-slate-300 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500"
+                  className="border-slate-700 text-slate-300 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500 text-xs px-2 sm:px-3"
                 >
                   Disconnect
                 </Button>
@@ -129,12 +139,12 @@ export function DatabaseDashboard() {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="text-slate-300 hover:text-white"
+              className="text-slate-300 hover:text-white h-8 w-8 sm:h-10 sm:w-10"
             >
               {mounted && theme === "dark" ? (
-                <Sun className="h-5 w-5" />
+                <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
               ) : (
-                <Moon className="h-5 w-5" />
+                <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
               )}
             </Button>
 
@@ -150,36 +160,36 @@ export function DatabaseDashboard() {
 
       {!connected ? (
         // Welcome Screen
-        <div className="flex flex-1 items-center justify-center">
-          <Card className="w-full max-w-2xl border-slate-800 bg-slate-900/50 p-12 text-center backdrop-blur-xl">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600">
-              <Database className="h-10 w-10 text-white" />
+        <div className="flex flex-1 items-center justify-center p-4">
+          <Card className="w-full max-w-2xl border-slate-800 bg-slate-900/50 p-6 sm:p-12 text-center backdrop-blur-xl">
+            <div className="mx-auto mb-4 sm:mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600">
+              <Database className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
-            <h2 className="mb-3 text-3xl font-bold text-white">
+            <h2 className="mb-2 sm:mb-3 text-2xl sm:text-3xl font-bold text-white">
               Welcome to QData
             </h2>
-            <p className="mb-8 text-lg text-slate-400">
+            <p className="mb-6 sm:mb-8 text-base sm:text-lg text-slate-400">
               Simple, beautiful MySQL database management
             </p>
-            <div className="mb-8 grid gap-4 text-left sm:grid-cols-3">
-              <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-                <Zap className="mb-2 h-6 w-6 text-blue-500" />
-                <h3 className="mb-1 font-semibold text-white">Lightning Fast</h3>
-                <p className="text-sm text-slate-400">
+            <div className="mb-6 sm:mb-8 grid gap-3 sm:gap-4 text-left grid-cols-1 sm:grid-cols-3">
+              <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3 sm:p-4">
+                <Zap className="mb-2 h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+                <h3 className="mb-1 text-sm sm:text-base font-semibold text-white">Lightning Fast</h3>
+                <p className="text-xs sm:text-sm text-slate-400">
                   Optimized for speed and performance
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-                <Table2 className="mb-2 h-6 w-6 text-purple-500" />
-                <h3 className="mb-1 font-semibold text-white">Modern UI</h3>
-                <p className="text-sm text-slate-400">
+              <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3 sm:p-4">
+                <Table2 className="mb-2 h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+                <h3 className="mb-1 text-sm sm:text-base font-semibold text-white">Modern UI</h3>
+                <p className="text-xs sm:text-sm text-slate-400">
                   Beautiful, intuitive interface
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-                <Database className="mb-2 h-6 w-6 text-green-500" />
-                <h3 className="mb-1 font-semibold text-white">Powerful Tools</h3>
-                <p className="text-sm text-slate-400">
+              <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3 sm:p-4">
+                <Database className="mb-2 h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
+                <h3 className="mb-1 text-sm sm:text-base font-semibold text-white">Powerful Tools</h3>
+                <p className="text-xs sm:text-sm text-slate-400">
                   Everything you need to manage MySQL
                 </p>
               </div>
@@ -197,53 +207,55 @@ export function DatabaseDashboard() {
         </div>
       ) : (
         // Main Dashboard
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
           {/* Sidebar */}
-          <aside className="w-64 border-r border-slate-800 bg-slate-950/30 backdrop-blur-xl overflow-y-auto">
-            <div className="p-4">
-              <div className="relative mb-4">
+          <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/30 backdrop-blur-xl overflow-y-auto max-h-48 md:max-h-none">
+            <div className="p-3 sm:p-4">
+              <div className="relative mb-3 sm:mb-4">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   placeholder="Search databases..."
-                  className="pl-9 border-slate-800 bg-slate-900/50"
+                  className="pl-9 border-slate-800 bg-slate-900/50 text-sm h-9"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               
               {loadingDatabases ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-blue-500" />
                 </div>
               ) : filteredDatabases.length > 0 ? (
                 <div className="space-y-1">
                   <p className="mb-2 text-xs font-semibold text-slate-400 uppercase">
                     Databases ({filteredDatabases.length})
                   </p>
-                  {filteredDatabases.map((db) => (
-                    <button
-                      key={db}
-                      onClick={() => {
-                        setSelectedDatabase(db);
-                        setSelectedTable(null);
-                      }}
-                      className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                        selectedDatabase === db
-                          ? "bg-blue-500/20 text-blue-400 font-medium"
-                          : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Database className="h-4 w-4" />
-                        <span className="truncate">{db}</span>
-                      </div>
-                    </button>
-                  ))}
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-1">
+                    {filteredDatabases.map((db) => (
+                      <button
+                        key={db}
+                        onClick={() => {
+                          setSelectedDatabase(db);
+                          setSelectedTable(null);
+                        }}
+                        className={`w-full rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-left text-xs sm:text-sm transition-colors ${
+                          selectedDatabase === db
+                            ? "bg-blue-500/20 text-blue-400 font-medium"
+                            : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Database className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                          <span className="truncate">{db}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
-                <div className="py-8 text-center">
-                  <Database className="mx-auto h-12 w-12 text-slate-600 mb-2" />
-                  <p className="text-sm text-slate-400">
+                <div className="py-6 sm:py-8 text-center">
+                  <Database className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-slate-600 mb-2" />
+                  <p className="text-xs sm:text-sm text-slate-400">
                     {searchQuery ? "No databases found" : "No databases available"}
                   </p>
                 </div>
@@ -255,10 +267,10 @@ export function DatabaseDashboard() {
           <main className="flex flex-1 flex-col overflow-hidden">
             {/* Tabs */}
             <div className="border-b border-slate-800 bg-slate-950/30 backdrop-blur-xl">
-              <div className="flex gap-1 px-4 pt-2">
+              <div className="flex gap-1 px-3 sm:px-4 pt-2">
                 <button
                   onClick={() => setActiveTab("browse")}
-                  className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === "browse"
                       ? "bg-slate-900/50 text-white"
                       : "text-slate-400 hover:text-white"
@@ -268,7 +280,7 @@ export function DatabaseDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab("query")}
-                  className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === "query"
                       ? "bg-slate-900/50 text-white"
                       : "text-slate-400 hover:text-white"
@@ -280,12 +292,20 @@ export function DatabaseDashboard() {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
               {activeTab === "browse" ? (
-                <TableBrowser
-                  database={selectedDatabase}
-                  table={selectedTable}
-                />
+                selectedTable && selectedDatabase ? (
+                  <TableDataViewer
+                    database={selectedDatabase}
+                    table={selectedTable}
+                    onBack={() => setSelectedTable(null)}
+                  />
+                ) : (
+                  <TableBrowser
+                    database={selectedDatabase}
+                    onTableSelect={(tableName) => setSelectedTable(tableName)}
+                  />
+                )
               ) : (
                 <QueryEditor />
               )}

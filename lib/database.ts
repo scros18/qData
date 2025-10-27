@@ -1,6 +1,11 @@
 import mysql from 'mysql2/promise';
 
-let pool: mysql.Pool | null = null;
+// Use globalThis to persist pool across hot reloads in development
+const globalForDb = globalThis as unknown as {
+  pool: mysql.Pool | null;
+};
+
+let pool = globalForDb.pool || null;
 
 export interface DatabaseConfig {
   host: string;
@@ -26,14 +31,21 @@ export function createPool(config: DatabaseConfig) {
     queueLimit: 0,
   });
   
+  // Store in globalThis for hot reload persistence
+  globalForDb.pool = pool;
+  
   return pool;
 }
 
 export function getPool() {
   if (!pool) {
-    throw new Error('Database pool not initialized. Please connect first.');
+    throw new Error('Database connection lost. Please reconnect.');
   }
   return pool;
+}
+
+export function isConnected(): boolean {
+  return pool !== null;
 }
 
 export async function testConnection(config: DatabaseConfig): Promise<boolean> {

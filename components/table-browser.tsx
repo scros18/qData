@@ -6,10 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface TableBrowserProps {
   database: string | null;
-  table: string | null;
+  onTableSelect: (tableName: string) => void;
 }
 
-export function TableBrowser({ database, table }: TableBrowserProps) {
+export function TableBrowser({ database, onTableSelect }: TableBrowserProps) {
   const [tables, setTables] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -29,11 +29,20 @@ export function TableBrowser({ database, table }: TableBrowserProps) {
       if (data.success) {
         setTables(data.tables);
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to fetch tables",
-          variant: "destructive",
-        });
+        // Check if reconnection is needed
+        if (data.needsReconnect) {
+          toast({
+            title: "Connection Lost",
+            description: "Please reconnect to the database",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch tables",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error fetching tables:", error);
@@ -89,6 +98,7 @@ export function TableBrowser({ database, table }: TableBrowserProps) {
             {tables.map((tableName) => (
               <button
                 key={tableName}
+                onClick={() => onTableSelect(tableName)}
                 className="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 p-4 text-left transition-all hover:border-blue-500 hover:bg-slate-800 hover:shadow-lg hover:shadow-blue-500/10"
               >
                 <Table className="h-5 w-5 text-slate-400" />
