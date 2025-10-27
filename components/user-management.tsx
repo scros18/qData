@@ -129,8 +129,8 @@ export function UserManagement() {
   };
 
   return (
-    <Card className="border-slate-800 bg-slate-900/50 p-6">
-      <div className="flex items-center justify-between mb-6">
+    <Card className="border-slate-800 bg-slate-900/50 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-emerald-500/10">
             <Users className="h-6 w-6 text-emerald-500" />
@@ -143,7 +143,7 @@ export function UserManagement() {
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400">
+            <Button className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 w-full sm:w-auto">
               <UserPlus className="h-4 w-4 mr-2" />
               Add User
             </Button>
@@ -243,10 +243,10 @@ export function UserManagement() {
           {users.map((user) => (
             <Card
               key={user.id}
-              className="border-slate-800 bg-slate-800/50 p-4 hover:bg-slate-800/70 transition-colors"
+              className="border-slate-800 bg-slate-800/50 p-3 sm:p-4 hover:bg-slate-800/70 transition-colors"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between">
+                <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
                   <div
                     className={`p-2 rounded-lg ${
                       user.role === "admin"
@@ -262,7 +262,7 @@ export function UserManagement() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-white font-medium truncate">{user.username}</h3>
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${
@@ -280,7 +280,7 @@ export function UserManagement() {
                       )}
                     </div>
 
-                    <div className="flex gap-4 mt-1 text-xs text-slate-400">
+                    <div className="flex flex-col sm:flex-row sm:gap-4 mt-1 text-xs text-slate-400">
                       <span>Created: {formatDate(user.createdAt)}</span>
                       {user.lastLogin && <span>Last login: {formatDate(user.lastLogin)}</span>}
                       {user.createdBy && <span>By: {user.createdBy}</span>}

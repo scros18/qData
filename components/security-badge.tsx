@@ -50,7 +50,10 @@ export function SecurityBadge() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setShowDetails(!showDetails)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowDetails(!showDetails);
+          }}
           className="relative group"
           title="Security Status"
         >
@@ -74,7 +77,10 @@ export function SecurityBadge() {
             onClick={() => setShowDetails(false)}
           />
           
-          <Card className="fixed top-16 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-sm p-4 bg-slate-900 border-slate-700 shadow-2xl z-[9999]">
+          <Card 
+            onClick={(e) => e.stopPropagation()}
+            className="fixed top-16 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-sm p-4 bg-slate-900 border-slate-700 shadow-2xl z-[9999]"
+          >
             <div className="space-y-4">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-700 pb-3">

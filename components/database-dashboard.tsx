@@ -389,7 +389,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
 
             {/* Content Area */}
             <div className="flex-1 overflow-hidden">
-              <div className={activeTab === "performance" ? "h-full overflow-hidden" : "h-full overflow-auto p-3 sm:p-4 md:p-6"}>
+              <div className={activeTab === "performance" ? "h-full overflow-y-auto overflow-x-hidden" : "h-full overflow-auto p-3 sm:p-4 md:p-6"}>
                 {activeTab === "users" ? (
                   <UserManagement />
                 ) : activeTab === "logs" ? (

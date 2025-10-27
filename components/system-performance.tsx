@@ -221,7 +221,7 @@ export function SystemPerformance() {
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-6 h-full overflow-hidden">
+    <div className="space-y-4 p-4 md:p-6 min-h-full">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10">
