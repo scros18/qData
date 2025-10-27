@@ -74,7 +74,7 @@ export function TableBrowser({ database, onTableSelect }: TableBrowserProps) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-6">
+      <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
