@@ -139,6 +139,19 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
+            {/* User Info */}
+            {username && (
+              <div className="hidden sm:flex items-center gap-2 mr-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="text-xs text-slate-400">Logged in as:</span>
+                <span className="text-sm font-medium text-white">{username}</span>
+                {userRole === "admin" && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                    Admin
+                  </span>
+                )}
+              </div>
+            )}
+
             {connected && (
               <>
                 <div className="mr-1 sm:mr-2 flex items-center gap-1 sm:gap-2">
@@ -167,6 +180,16 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
               ) : (
                 <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
               )}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onLogout}
+              className="text-slate-300 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 sm:h-10 sm:w-10"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
 
             {!connected && (
@@ -297,6 +320,7 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
+                  <Table2 className="h-4 w-4 inline mr-1.5" />
                   Browse
                 </button>
                 <button
@@ -307,14 +331,30 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
+                  <Zap className="h-4 w-4 inline mr-1.5" />
                   Query
                 </button>
+                {userRole === "admin" && (
+                  <button
+                    onClick={() => setActiveTab("users")}
+                    className={`rounded-t-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors ${
+                      activeTab === "users"
+                        ? "bg-slate-900/50 text-white"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <UsersIcon className="h-4 w-4 inline mr-1.5" />
+                    Users
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Content Area */}
             <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
-              {activeTab === "browse" ? (
+              {activeTab === "users" ? (
+                <UserManagement />
+              ) : activeTab === "browse" ? (
                 selectedTable && selectedDatabase ? (
                   <TableDataViewer
                     database={selectedDatabase}
