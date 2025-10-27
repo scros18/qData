@@ -5,6 +5,9 @@ import { Table, Loader2, RefreshCw, Plus, Save, X, ChevronLeft, ChevronRight } f
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const NON_EDITABLE_COLUMNS = ['id', 'created_at', 'updated_at', 'timestamp'];
 
@@ -29,6 +32,8 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
   const [editedRows, setEditedRows] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [newRowData, setNewRowData] = useState<Record<string, any>>({});
   const pageSize = 50;
   const { toast } = useToast();
 
@@ -181,10 +186,57 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
   };
 
   const handleAddRow = () => {
-    toast({
-      title: "Add Row",
-      description: "Coming soon! This feature will allow you to insert new rows.",
+    // Initialize new row data with null values for all columns except non-editable ones
+    const initialData: Record<string, any> = {};
+    columns.forEach(col => {
+      if (!NON_EDITABLE_COLUMNS.includes(col.toLowerCase())) {
+        initialData[col] = '';
+      }
     });
+    setNewRowData(initialData);
+    setShowAddDialog(true);
+  };
+
+  const handleAddRowSubmit = async () => {
+    try {
+      setSaving(true);
+      const response = await fetch('/qdata/api/add-row', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          database,
+          table,
+          rowData: newRowData,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "✓ Row Added",
+          description: "Successfully added new row to table",
+        });
+        setShowAddDialog(false);
+        setNewRowData({});
+        fetchTableData(); // Refresh to show new row
+      } else {
+        toast({
+          title: "✗ Failed to Add Row",
+          description: result.error || "Failed to add row",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding row:", error);
+      toast({
+        title: "✗ Error",
+        description: "Failed to add row to database",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -391,6 +443,62 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
           </div>
         )}
       </Card>
+
+      {/* Add Row Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Add New Row to {table}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {columns
+              .filter(col => !NON_EDITABLE_COLUMNS.includes(col.toLowerCase()))
+              .map((column) => (
+                <div key={column} className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor={column} className="text-right text-slate-300">
+                    {column}
+                  </Label>
+                  <Input
+                    id={column}
+                    value={newRowData[column] || ''}
+                    onChange={(e) => setNewRowData({ ...newRowData, [column]: e.target.value })}
+                    className="col-span-3 bg-slate-800 border-slate-700 text-white"
+                    placeholder={`Enter ${column}`}
+                  />
+                </div>
+              ))}
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowAddDialog(false);
+                setNewRowData({});
+              }}
+              className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddRowSubmit}
+              disabled={saving}
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Row
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

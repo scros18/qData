@@ -131,26 +131,16 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
       <header className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-xl">
         <div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Terminal-style logo with macOS window controls and Q */}
-            <div className="relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 overflow-hidden group hover:border-emerald-500/50 transition-all">
-              {/* macOS window dots */}
-              <div className="absolute top-1 left-1 flex gap-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500/60 group-hover:bg-red-500"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/60 group-hover:bg-yellow-500"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500/60 group-hover:bg-green-500"></div>
-              </div>
-              {/* Q with terminal cursor */}
-              <div className="flex items-center">
-                <span className="text-emerald-400 font-bold text-base sm:text-lg font-mono tracking-tight">Q</span>
-                <div className="w-0.5 h-3 sm:h-4 bg-emerald-400 ml-0.5 animate-pulse"></div>
-              </div>
+            {/* Simple Q Logo */}
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-sky-500 shadow-lg shadow-sky-500/50 hover:shadow-sky-500/70 transition-all">
+              <span className="text-white font-bold text-lg sm:text-xl">Q</span>
             </div>
             <div>
               <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">QData</h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-3 ml-auto">
+          <div className="flex items-center gap-2 sm:gap-3 ml-auto">
             {/* User Info - Desktop Only */}
             {username && (
               <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700">
@@ -225,8 +215,8 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
         // Welcome Screen
         <div className="flex flex-1 items-center justify-center p-4">
           <Card className="w-full max-w-2xl border-slate-800 bg-slate-900/50 p-6 sm:p-12 text-center backdrop-blur-xl">
-            <div className="mx-auto mb-4 sm:mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600">
-              <Database className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+            <div className="mx-auto mb-4 sm:mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-sky-500 shadow-lg shadow-sky-500/50">
+              <span className="text-white font-bold text-4xl sm:text-5xl">Q</span>
             </div>
             <h2 className="mb-2 sm:mb-3 text-2xl sm:text-3xl font-bold text-white">
               Welcome to QData
