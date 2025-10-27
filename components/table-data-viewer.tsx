@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Table, Loader2, RefreshCw, Plus, Save, X, ChevronLeft, ChevronRight, FileJson, FileSpreadsheet } from "lucide-react";
+import { Table, Loader2, RefreshCw, Plus, Save, X, ChevronLeft, ChevronRight, FileJson, FileSpreadsheet, Copy, Trash2, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
@@ -34,6 +34,13 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
   const [saving, setSaving] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newRowData, setNewRowData] = useState<Record<string, any>>({});
+  const [contextMenu, setContextMenu] = useState<{ show: boolean; x: number; y: number; rowIndex: number; rowData: any }>({
+    show: false,
+    x: 0,
+    y: 0,
+    rowIndex: -1,
+    rowData: null,
+  });
   const pageSize = 50;
   const { toast } = useToast();
 
@@ -41,6 +48,15 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
     fetchTableData();
     fetchTableStructure();
   }, [database, table, page]);
+
+  // Close context menu on click outside
+  useEffect(() => {
+    const handleClick = () => setContextMenu({ show: false, x: 0, y: 0, rowIndex: -1, rowData: null });
+    if (contextMenu.show) {
+      document.addEventListener("click", handleClick);
+      return () => document.removeEventListener("click", handleClick);
+    }
+  }, [contextMenu.show]);
 
   const fetchTableStructure = async () => {
     try {
@@ -280,6 +296,50 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
     }
   };
 
+  const handleRowContextMenu = (e: React.MouseEvent, rowIndex: number, rowData: any) => {
+    e.preventDefault();
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      rowIndex,
+      rowData,
+    });
+  };
+
+  const handleDuplicateRow = async () => {
+    toast({
+      title: "📋 Duplicating Row",
+      description: "Creating a copy of this row...",
+    });
+    // TODO: Implement duplicate row
+    setTimeout(() => {
+      toast({
+        title: "Feature Coming Soon",
+        description: "Duplicate row will be implemented",
+      });
+    }, 500);
+  };
+
+  const handleDeleteRow = async () => {
+    if (!confirm("⚠️ Are you sure you want to delete this row? This action cannot be undone.")) {
+      return;
+    }
+
+    toast({
+      title: "🗑️ Deleting Row",
+      description: "Removing row from database...",
+      variant: "destructive",
+    });
+    // TODO: Implement delete row
+    setTimeout(() => {
+      toast({
+        title: "Feature Coming Soon",
+        description: "Delete row will be implemented",
+      });
+    }, 500);
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-slate-800 bg-slate-900/50 p-4 sm:p-6">
@@ -411,6 +471,7 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
                   return (
                     <tr
                       key={rowIndex}
+                      onContextMenu={(e) => handleRowContextMenu(e, rowIndex, row)}
                       className={`hover:bg-slate-800/50 transition-colors ${
                         isRowEdited ? 'bg-amber-500/10' : ''
                       }`}
@@ -560,6 +621,67 @@ export function TableDataViewer({ database, table, onBack }: TableDataViewerProp
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Row Context Menu */}
+      {contextMenu.show && (
+        <div
+          className="fixed bg-slate-900 border border-slate-700 rounded-lg shadow-2xl py-2 z-[9999] min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200"
+          style={{
+            left: `${contextMenu.x}px`,
+            top: `${contextMenu.y}px`,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="px-3 py-2 border-b border-slate-700">
+            <span className="text-xs font-semibold text-slate-400">Row #{(page - 1) * pageSize + contextMenu.rowIndex + 1}</span>
+          </div>
+
+          {/* Actions */}
+          <div className="py-1">
+            <button
+              onClick={() => {
+                // Start editing the first editable column
+                const editableColumn = columns.find(col => !NON_EDITABLE_COLUMNS.includes(col.toLowerCase()));
+                if (editableColumn) {
+                  handleCellDoubleClick(contextMenu.rowIndex, editableColumn, contextMenu.rowData[editableColumn]);
+                }
+                setContextMenu({ show: false, x: 0, y: 0, rowIndex: -1, rowData: null });
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-3 transition-colors"
+            >
+              <Edit2 className="h-4 w-4 text-blue-400" />
+              <span>Edit Row</span>
+            </button>
+            <button
+              onClick={() => {
+                handleDuplicateRow();
+                setContextMenu({ show: false, x: 0, y: 0, rowIndex: -1, rowData: null });
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-3 transition-colors"
+            >
+              <Copy className="h-4 w-4 text-purple-400" />
+              <span>Duplicate Row</span>
+            </button>
+          </div>
+
+          <div className="border-t border-slate-700 my-1"></div>
+
+          {/* Dangerous Actions */}
+          <div className="py-1">
+            <button
+              onClick={() => {
+                handleDeleteRow();
+                setContextMenu({ show: false, x: 0, y: 0, rowIndex: -1, rowData: null });
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 flex items-center gap-3 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>Delete Row</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
