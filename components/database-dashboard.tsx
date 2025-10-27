@@ -14,6 +14,7 @@ import { TableDataViewer } from "./table-data-viewer";
 import { UserManagement } from "./user-management";
 import { AuditLogs } from "./audit-logs";
 import { useToast } from "@/hooks/use-toast";
+import { SecurityBadge } from "./security-badge";
 
 interface DatabaseDashboardProps {
   onLogout: () => void;
@@ -141,6 +142,9 @@ export function DatabaseDashboard({ onLogout }: DatabaseDashboardProps) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+            {/* Security Badge */}
+            <SecurityBadge />
+
             {/* User Info - Desktop Only */}
             {username && (
               <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700">

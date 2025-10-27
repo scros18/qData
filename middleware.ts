@@ -1,8 +1,73 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// CSRF Token Storage (in-memory for now, should be Redis in production)
+const csrfTokens = new Map<string, { token: string; expiresAt: number }>();
+
+// Generate CSRF token
+function generateCsrfToken(): string {
+  const crypto = require('crypto');
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// Validate CSRF token
+function validateCsrfToken(sessionId: string, token: string): boolean {
+  const stored = csrfTokens.get(sessionId);
+  if (!stored || stored.token !== token || stored.expiresAt < Date.now()) {
+    return false;
+  }
+  return true;
+}
+
+// Store CSRF token
+function storeCsrfToken(sessionId: string, token: string): void {
+  csrfTokens.set(sessionId, {
+    token,
+    expiresAt: Date.now() + (60 * 60 * 1000), // 1 hour
+  });
+}
+
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  const pathname = request.nextUrl.pathname;
+
+  // CSRF Protection for API mutations
+  if (pathname.startsWith('/qdata/api/') && 
+      (request.method === 'POST' || request.method === 'PUT' || request.method === 'DELETE')) {
+    
+    // Skip CSRF check for initial setup and login
+    if (pathname.includes('/auth/setup') || pathname.includes('/auth/login')) {
+      // Allow these through
+    } else {
+      // Check CSRF token
+      const csrfToken = request.headers.get('x-csrf-token');
+      const sessionCookie = request.cookies.get('qdata_session')?.value;
+
+      if (!csrfToken || !sessionCookie) {
+        return NextResponse.json(
+          { error: 'CSRF token missing or invalid' },
+          { status: 403 }
+        );
+      }
+
+      if (!validateCsrfToken(sessionCookie, csrfToken)) {
+        return NextResponse.json(
+          { error: 'CSRF token invalid or expired' },
+          { status: 403 }
+        );
+      }
+    }
+  }
+
+  // Generate and set CSRF token for GET requests
+  if (request.method === 'GET' && pathname.startsWith('/qdata')) {
+    const sessionCookie = request.cookies.get('qdata_session')?.value;
+    if (sessionCookie) {
+      const csrfToken = generateCsrfToken();
+      storeCsrfToken(sessionCookie, csrfToken);
+      response.headers.set('X-CSRF-Token', csrfToken);
+    }
+  }
 
   // Force HTTPS in production
   if (process.env.NODE_ENV === 'production') {
@@ -69,8 +134,13 @@ export function middleware(request: NextRequest) {
     ].join(', ')
   );
 
-  // Remove server header
+  // Remove server identification
   headers.delete('X-Powered-By');
+  headers.delete('Server');
+
+  // Add security-focused custom headers
+  headers.set('X-Security-Level', 'Enterprise');
+  headers.set('X-Protected-By', 'QData');
 
   return response;
 }
