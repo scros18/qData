@@ -13,6 +13,12 @@ export interface DatabaseConfig {
   user: string;
   password: string;
   database?: string;
+  ssl?: {
+    rejectUnauthorized?: boolean;
+    ca?: string;
+    cert?: string;
+    key?: string;
+  };
 }
 
 export function createPool(config: DatabaseConfig) {
@@ -20,7 +26,7 @@ export function createPool(config: DatabaseConfig) {
     pool.end();
   }
   
-  pool = mysql.createPool({
+  const poolConfig: any = {
     host: config.host,
     port: config.port,
     user: config.user,
@@ -29,7 +35,22 @@ export function createPool(config: DatabaseConfig) {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-  });
+    connectTimeout: 10000, // 10 seconds
+    timeout: 30000, // 30 seconds for queries
+  };
+
+  // Add SSL/TLS if configured
+  if (config.ssl) {
+    poolConfig.ssl = config.ssl;
+  }
+
+  // In production, warn if SSL is not enabled
+  if (process.env.NODE_ENV === 'production' && !config.ssl) {
+    console.warn('⚠️  WARNING: Database connection without SSL/TLS in production!');
+    console.warn('⚠️  This is a security risk. Enable SSL/TLS for database connections.');
+  }
+  
+  pool = mysql.createPool(poolConfig);
   
   // Store in globalThis for hot reload persistence
   globalForDb.pool = pool;
@@ -50,14 +71,22 @@ export function isConnected(): boolean {
 
 export async function testConnection(config: DatabaseConfig): Promise<boolean> {
   try {
-    const testPool = mysql.createPool({
+    const testPoolConfig: any = {
       host: config.host,
       port: config.port,
       user: config.user,
       password: config.password,
       database: config.database,
       connectionLimit: 1,
-    });
+      connectTimeout: 10000,
+    };
+
+    // Add SSL/TLS if configured
+    if (config.ssl) {
+      testPoolConfig.ssl = config.ssl;
+    }
+
+    const testPool = mysql.createPool(testPoolConfig);
     
     await testPool.query('SELECT 1');
     await testPool.end();

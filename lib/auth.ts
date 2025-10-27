@@ -1,6 +1,7 @@
 import { createHash, randomBytes, pbkdf2Sync } from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { validatePasswordStrength, validatePin, validateUsername, checkRateLimit, resetRateLimit, logSecurityEvent } from './security';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
@@ -32,6 +33,8 @@ export interface Session {
   createdAt: string;
   expiresAt: string;
   pinVerified: boolean;
+  lastActivity: string;
+  ipAddress?: string;
 }
 
 // Hash password with salt
@@ -121,6 +124,24 @@ export function createAdminUser(username: string, password: string, pin: string)
     throw new Error('Admin user already exists');
   }
 
+  // Validate username
+  const usernameValidation = validateUsername(username);
+  if (!usernameValidation.isValid) {
+    throw new Error(usernameValidation.error || 'Invalid username');
+  }
+
+  // Validate password strength
+  const passwordStrength = validatePasswordStrength(password);
+  if (!passwordStrength.isValid) {
+    throw new Error(`Weak password: ${passwordStrength.feedback.join(', ')}`);
+  }
+
+  // Validate PIN
+  const pinValidation = validatePin(pin);
+  if (!pinValidation.isValid) {
+    throw new Error(pinValidation.error || 'Invalid PIN');
+  }
+
   const { hash: passwordHash, salt } = hashPassword(password);
   const pinHash = hashPin(pin, salt);
 
@@ -138,6 +159,12 @@ export function createAdminUser(username: string, password: string, pin: string)
   users.push(admin);
   saveUsers(users);
   
+  logSecurityEvent({
+    type: 'login_success',
+    username,
+    details: 'Admin user created'
+  });
+  
   return admin;
 }
 
@@ -153,6 +180,24 @@ export function createUser(
   // Check if username already exists
   if (users.some(u => u.username === username)) {
     throw new Error('Username already exists');
+  }
+
+  // Validate username
+  const usernameValidation = validateUsername(username);
+  if (!usernameValidation.isValid) {
+    throw new Error(usernameValidation.error || 'Invalid username');
+  }
+
+  // Validate password strength
+  const passwordStrength = validatePasswordStrength(password);
+  if (!passwordStrength.isValid) {
+    throw new Error(`Weak password: ${passwordStrength.feedback.join(', ')}`);
+  }
+
+  // Validate PIN
+  const pinValidation = validatePin(pin);
+  if (!pinValidation.isValid) {
+    throw new Error(pinValidation.error || 'Invalid PIN');
   }
 
   const { hash: passwordHash, salt } = hashPassword(password);
@@ -173,25 +218,65 @@ export function createUser(
   users.push(user);
   saveUsers(users);
 
+  logSecurityEvent({
+    type: 'login_success',
+    username: createdBy,
+    details: `Created new user: ${username}`
+  });
+
   return user;
 }
 
 // Authenticate user
-export function authenticateUser(username: string, password: string): User | null {
+export function authenticateUser(username: string, password: string, ipAddress?: string): User | null {
+  // Check rate limit
+  const rateLimit = checkRateLimit(ipAddress || username);
+  if (!rateLimit.allowed) {
+    logSecurityEvent({
+      type: 'rate_limit',
+      username,
+      ip: ipAddress,
+      details: rateLimit.message
+    });
+    throw new Error(rateLimit.message || 'Too many login attempts');
+  }
+
   const users = loadUsers();
   const user = users.find(u => u.username === username && u.isActive);
 
   if (!user) {
+    logSecurityEvent({
+      type: 'login_failed',
+      username,
+      ip: ipAddress,
+      details: 'User not found or inactive'
+    });
     return null;
   }
 
   if (!verifyPassword(password, user.passwordHash, user.salt)) {
+    logSecurityEvent({
+      type: 'login_failed',
+      username,
+      ip: ipAddress,
+      details: 'Invalid password'
+    });
     return null;
   }
+
+  // Successful login - reset rate limit
+  resetRateLimit(ipAddress || username);
 
   // Update last login
   user.lastLogin = new Date().toISOString();
   saveUsers(users);
+
+  logSecurityEvent({
+    type: 'login_success',
+    username,
+    ip: ipAddress,
+    details: 'User authenticated successfully'
+  });
 
   return user;
 }
@@ -209,17 +294,20 @@ export function verifyUserPin(userId: string, pin: string): boolean {
 }
 
 // Create session
-export function createSession(user: User, pinVerified: boolean = false): Session {
+export function createSession(user: User, pinVerified: boolean = false, ipAddress?: string): Session {
   const sessions = loadSessions();
+  const now = new Date();
 
   const session: Session = {
     sessionId: randomBytes(32).toString('hex'),
     userId: user.id,
     username: user.username,
     role: user.role,
-    createdAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+    createdAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
     pinVerified,
+    lastActivity: now.toISOString(),
+    ipAddress,
   };
 
   sessions.push(session);
@@ -237,11 +325,30 @@ export function getSession(sessionId: string): Session | null {
     return null;
   }
 
+  const now = new Date();
+
   // Check if expired
-  if (new Date(session.expiresAt) < new Date()) {
+  if (new Date(session.expiresAt) < now) {
     deleteSession(sessionId);
     return null;
   }
+
+  // Check for inactivity timeout (15 minutes)
+  const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  const lastActivity = new Date(session.lastActivity);
+  if (now.getTime() - lastActivity.getTime() > INACTIVITY_TIMEOUT) {
+    deleteSession(sessionId);
+    logSecurityEvent({
+      type: 'logout',
+      username: session.username,
+      details: 'Session expired due to inactivity'
+    });
+    return null;
+  }
+
+  // Update last activity
+  session.lastActivity = now.toISOString();
+  saveSessions(sessions);
 
   return session;
 }
